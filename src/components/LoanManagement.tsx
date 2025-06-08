@@ -1,29 +1,20 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Search,
-  Filter,
   Eye,
-  CheckCircle,
-  XCircle,
-  Clock,
-  FileText,
-  Download,
-  Star,
+  User,
   MapPin,
   Phone,
   Mail,
-  Calendar,
-  DollarSign,
+  Download,
 } from "lucide-react";
 
 interface LoanManagementProps {
@@ -35,66 +26,137 @@ const mockLoans = [
     id: 'LN001',
     applicantName: 'Rajesh Kumar',
     businessName: 'Kumar Electronics',
-    amount: 500000,
-    tenure: 24,
+    amount: 25000,
+    tenure: 18,
     interestRate: 12.5,
-    status: 'pending',
+    status: 'active',
     riskScore: 7.2,
     applicationDate: '2024-01-15',
-    location: 'Mumbai, MH',
+    location: 'Noida, UP',
     phone: '+91 98765 43210',
     email: 'rajesh.kumar@email.com',
     vkycStatus: 'verified',
-    documents: ['PAN', 'Aadhaar', 'Bank Statement', 'GST Certificate'],
+    repaymentModel: 'daily',
+    dpd: 0,
+    outstanding: 6660,
+    cibilScore: 742,
+    pincode: '201301'
   },
   {
     id: 'LN002',
     applicantName: 'Priya Sharma',
     businessName: 'Sharma Textiles',
-    amount: 750000,
-    tenure: 36,
+    amount: 35000,
+    tenure: 24,
     interestRate: 11.8,
-    status: 'approved',
+    status: 'overdue',
     riskScore: 8.5,
     applicationDate: '2024-01-12',
     location: 'Delhi, DL',
     phone: '+91 87654 32109',
     email: 'priya.sharma@email.com',
-    vkycStatus: 'pending',
-    documents: ['PAN', 'Aadhaar', 'Bank Statement', 'ITR'],
+    vkycStatus: 'verified',
+    repaymentModel: 'tenth_day',
+    dpd: 5,
+    outstanding: 28500,
+    cibilScore: 768,
+    pincode: '110001'
   },
   {
     id: 'LN003',
     applicantName: 'Mohammed Ali',
     businessName: 'Ali Trading Co.',
-    amount: 300000,
-    tenure: 18,
+    amount: 15000,
+    tenure: 12,
     interestRate: 13.2,
-    status: 'under_review',
+    status: 'pending',
     riskScore: 6.8,
     applicationDate: '2024-01-18',
     location: 'Bangalore, KA',
     phone: '+91 76543 21098',
     email: 'mohammed.ali@email.com',
-    vkycStatus: 'verified',
-    documents: ['PAN', 'Aadhaar', 'Bank Statement'],
+    vkycStatus: 'pending',
+    repaymentModel: 'monthly',
+    dpd: 0,
+    outstanding: 0,
+    cibilScore: 695,
+    pincode: '560001'
   },
+  {
+    id: 'LN004',
+    applicantName: 'Sunita Devi',
+    businessName: 'Sunita Saree Center',
+    amount: 40000,
+    tenure: 36,
+    interestRate: 12.0,
+    status: 'active',
+    riskScore: 8.2,
+    applicationDate: '2024-01-10',
+    location: 'Mumbai, MH',
+    phone: '+91 98765 12345',
+    email: 'sunita.devi@email.com',
+    vkycStatus: 'verified',
+    repaymentModel: 'daily',
+    dpd: 0,
+    outstanding: 35200,
+    cibilScore: 756,
+    pincode: '400001'
+  },
+  {
+    id: 'LN005',
+    applicantName: 'Ravi Patel',
+    businessName: 'Patel Hardware Store',
+    amount: 20000,
+    tenure: 18,
+    interestRate: 13.5,
+    status: 'closed',
+    riskScore: 7.8,
+    applicationDate: '2023-12-05',
+    location: 'Ahmedabad, GJ',
+    phone: '+91 99876 54321',
+    email: 'ravi.patel@email.com',
+    vkycStatus: 'verified',
+    repaymentModel: 'monthly',
+    dpd: 0,
+    outstanding: 0,
+    cibilScore: 723,
+    pincode: '380001'
+  },
+  {
+    id: 'LN006',
+    applicantName: 'Lakshmi Narayan',
+    businessName: 'Narayan Grocery Store',
+    amount: 12000,
+    tenure: 15,
+    interestRate: 14.0,
+    status: 'overdue',
+    riskScore: 6.2,
+    applicationDate: '2024-01-08',
+    location: 'Chennai, TN',
+    phone: '+91 98765 67890',
+    email: 'lakshmi.n@email.com',
+    vkycStatus: 'verified',
+    repaymentModel: 'tenth_day',
+    dpd: 12,
+    outstanding: 9800,
+    cibilScore: 678,
+    pincode: '600001'
+  }
 ];
 
 const LoanManagement: React.FC<LoanManagementProps> = ({ userRole }) => {
-  const [loans, setLoans] = useState(mockLoans);
+  const navigate = useNavigate();
+  const [loans] = useState(mockLoans);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [selectedLoan, setSelectedLoan] = useState<any>(null);
-  const [actionComment, setActionComment] = useState('');
+  const [repaymentFilter, setRepaymentFilter] = useState('all');
 
   const getStatusBadge = (status: string) => {
     const variants = {
       pending: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-      approved: 'bg-green-100 text-green-800 border-green-300',
-      rejected: 'bg-red-100 text-red-800 border-red-300',
-      under_review: 'bg-blue-100 text-blue-800 border-blue-300',
-      disbursed: 'bg-purple-100 text-purple-800 border-purple-300',
+      active: 'bg-green-100 text-green-800 border-green-300',
+      overdue: 'bg-red-100 text-red-800 border-red-300',
+      closed: 'bg-gray-100 text-gray-800 border-gray-300',
     };
     return variants[status as keyof typeof variants] || variants.pending;
   };
@@ -105,25 +167,25 @@ const LoanManagement: React.FC<LoanManagementProps> = ({ userRole }) => {
     return 'bg-red-100 text-red-800 border-red-300';
   };
 
-  const handleLoanAction = (loanId: string, action: 'approve' | 'reject') => {
-    setLoans(loans.map(loan => 
-      loan.id === loanId 
-        ? { ...loan, status: action === 'approve' ? 'approved' : 'rejected' }
-        : loan
-    ));
-    setActionComment('');
-    setSelectedLoan(null);
+  const getRepaymentModelText = (model: string) => {
+    const models = {
+      daily: 'Daily',
+      tenth_day: '10th Day',
+      monthly: 'Monthly'
+    };
+    return models[model as keyof typeof models] || model;
   };
 
   const filteredLoans = loans.filter(loan => {
     const matchesSearch = loan.applicantName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          loan.businessName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         loan.id.toLowerCase().includes(searchTerm.toLowerCase());
+                         loan.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         loan.phone.includes(searchTerm) ||
+                         loan.pincode.includes(searchTerm);
     const matchesStatus = statusFilter === 'all' || loan.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesRepayment = repaymentFilter === 'all' || loan.repaymentModel === repaymentFilter;
+    return matchesSearch && matchesStatus && matchesRepayment;
   });
-
-  const canTakeAction = userRole === 'admin' || userRole === 'credit_officer' || userRole === 'risk_manager';
 
   return (
     <div className="space-y-6">
@@ -132,13 +194,51 @@ const LoanManagement: React.FC<LoanManagementProps> = ({ userRole }) => {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Loan Management</h1>
           <p className="text-gray-600 mt-1">
-            Manage loan applications, review, and approve SME lending requests
+            Manage loan applications and accounts with detailed borrower information
           </p>
         </div>
         <Button className="bg-blue-600 hover:bg-blue-700">
           <Download className="w-4 h-4 mr-2" />
           Export Data
         </Button>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-blue-600">{loans.filter(l => l.status === 'active').length}</p>
+              <p className="text-sm text-gray-600">Active Loans</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-red-600">{loans.filter(l => l.status === 'overdue').length}</p>
+              <p className="text-sm text-gray-600">Overdue Loans</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-yellow-600">{loans.filter(l => l.status === 'pending').length}</p>
+              <p className="text-sm text-gray-600">Pending Approval</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-6">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-green-600">
+                ₹{loans.reduce((sum, loan) => sum + loan.outstanding, 0).toLocaleString()}
+              </p>
+              <p className="text-sm text-gray-600">Total Outstanding</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Filters */}
@@ -152,7 +252,7 @@ const LoanManagement: React.FC<LoanManagementProps> = ({ userRole }) => {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
-                  placeholder="Search by name, business, or loan ID..."
+                  placeholder="Search by name, business, loan ID, phone, or pincode..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -166,22 +266,32 @@ const LoanManagement: React.FC<LoanManagementProps> = ({ userRole }) => {
               <SelectContent>
                 <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="under_review">Under Review</SelectItem>
-                <SelectItem value="approved">Approved</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
-                <SelectItem value="disbursed">Disbursed</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="overdue">Overdue</SelectItem>
+                <SelectItem value="closed">Closed</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={repaymentFilter} onValueChange={setRepaymentFilter}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Repayment Model" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Models</SelectItem>
+                <SelectItem value="daily">Daily Collection</SelectItem>
+                <SelectItem value="tenth_day">10th Day Collection</SelectItem>
+                <SelectItem value="monthly">Monthly EMI</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </CardContent>
       </Card>
 
-      {/* Loan Applications Table */}
+      {/* Loans Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Loan Applications ({filteredLoans.length})</CardTitle>
+          <CardTitle>Loan Accounts ({filteredLoans.length})</CardTitle>
           <CardDescription>
-            Complete list of SME loan applications with current status
+            Complete list of loan accounts with borrower details and repayment information
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -189,268 +299,101 @@ const LoanManagement: React.FC<LoanManagementProps> = ({ userRole }) => {
             <TableHeader>
               <TableRow>
                 <TableHead>Loan ID</TableHead>
-                <TableHead>Applicant</TableHead>
+                <TableHead>Borrower Details</TableHead>
                 <TableHead>Business</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Risk Score</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>VKYC</TableHead>
-                <TableHead>Applied Date</TableHead>
+                <TableHead>Amount & Outstanding</TableHead>
+                <TableHead>Repayment Model</TableHead>
+                <TableHead>Status & DPD</TableHead>
+                <TableHead>CIBIL Score</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredLoans.map((loan) => (
-                <TableRow key={loan.id}>
+                <TableRow key={loan.id} className="hover:bg-gray-50">
                   <TableCell className="font-medium">{loan.id}</TableCell>
                   <TableCell>
-                    <div>
+                    <div className="space-y-1">
                       <div className="font-medium">{loan.applicantName}</div>
                       <div className="text-sm text-gray-500 flex items-center">
+                        <Phone className="w-3 h-3 mr-1" />
+                        {loan.phone}
+                      </div>
+                      <div className="text-sm text-gray-500 flex items-center">
+                        <Mail className="w-3 h-3 mr-1" />
+                        {loan.email}
+                      </div>
+                      <div className="text-sm text-gray-500 flex items-center">
                         <MapPin className="w-3 h-3 mr-1" />
-                        {loan.location}
+                        {loan.location} - {loan.pincode}
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>{loan.businessName}</TableCell>
-                  <TableCell className="font-medium">
-                    ₹{(loan.amount / 100000).toFixed(1)}L
+                  <TableCell>
+                    <div>
+                      <div className="font-medium">{loan.businessName}</div>
+                      <div className="text-sm text-gray-500">
+                        Applied: {loan.applicationDate}
+                      </div>
+                    </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center space-x-2">
-                      <Badge className={getRiskBadge(loan.riskScore)}>
-                        {loan.riskScore}/10
+                    <div>
+                      <div className="font-medium">₹{loan.amount.toLocaleString()}</div>
+                      {loan.outstanding > 0 && (
+                        <div className="text-sm text-red-600">
+                          Outstanding: ₹{loan.outstanding.toLocaleString()}
+                        </div>
+                      )}
+                      <div className="text-sm text-gray-500">
+                        {loan.interestRate}% • {loan.tenure}m
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="text-xs">
+                      {getRepaymentModelText(loan.repaymentModel)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="space-y-1">
+                      <Badge className={getStatusBadge(loan.status)}>
+                        {loan.status.toUpperCase()}
                       </Badge>
-                      <div className="flex">
-                        {[...Array(Math.floor(loan.riskScore / 2))].map((_, i) => (
-                          <Star key={i} className="w-3 h-3 text-yellow-400 fill-current" />
-                        ))}
-                      </div>
+                      {loan.dpd > 0 && (
+                        <div className="text-sm text-red-600 font-semibold">
+                          DPD: {loan.dpd}
+                        </div>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge className={getStatusBadge(loan.status)}>
-                      {loan.status.replace('_', ' ').toUpperCase()}
-                    </Badge>
+                    <div className="text-center">
+                      <div className="font-semibold">{loan.cibilScore}</div>
+                      <Badge className={getRiskBadge(loan.riskScore)} variant="outline">
+                        Risk: {loan.riskScore}/10
+                      </Badge>
+                    </div>
                   </TableCell>
                   <TableCell>
-                    <Badge 
-                      variant={loan.vkycStatus === 'verified' ? 'default' : 'secondary'}
-                      className={loan.vkycStatus === 'verified' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}
-                    >
-                      {loan.vkycStatus === 'verified' ? 'Verified' : 'Pending'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{loan.applicationDate}</TableCell>
-                  <TableCell>
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => setSelectedLoan(loan)}
-                        >
-                          <Eye className="w-4 h-4 mr-1" />
-                          View
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                        <DialogHeader>
-                          <DialogTitle>Loan Application Details - {selectedLoan?.id}</DialogTitle>
-                          <DialogDescription>
-                            Complete information and documents for loan application
-                          </DialogDescription>
-                        </DialogHeader>
-                        
-                        {selectedLoan && (
-                          <Tabs defaultValue="details" className="mt-4">
-                            <TabsList className="grid w-full grid-cols-4">
-                              <TabsTrigger value="details">Details</TabsTrigger>
-                              <TabsTrigger value="documents">Documents</TabsTrigger>
-                              <TabsTrigger value="risk">Risk Assessment</TabsTrigger>
-                              <TabsTrigger value="actions">Actions</TabsTrigger>
-                            </TabsList>
-                            
-                            <TabsContent value="details" className="space-y-4">
-                              <div className="grid grid-cols-2 gap-6">
-                                <Card>
-                                  <CardHeader>
-                                    <CardTitle className="text-lg flex items-center">
-                                      <FileText className="w-5 h-5 mr-2" />
-                                      Loan Details
-                                    </CardTitle>
-                                  </CardHeader>
-                                  <CardContent className="space-y-3">
-                                    <div className="flex justify-between">
-                                      <span className="text-gray-600">Amount:</span>
-                                      <span className="font-semibold">₹{(selectedLoan.amount / 100000).toFixed(1)}L</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <span className="text-gray-600">Tenure:</span>
-                                      <span className="font-semibold">{selectedLoan.tenure} months</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <span className="text-gray-600">Interest Rate:</span>
-                                      <span className="font-semibold">{selectedLoan.interestRate}% p.a.</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <span className="text-gray-600">EMI:</span>
-                                      <span className="font-semibold">₹{Math.round(selectedLoan.amount * selectedLoan.interestRate / 1200).toLocaleString()}</span>
-                                    </div>
-                                  </CardContent>
-                                </Card>
-                                
-                                <Card>
-                                  <CardHeader>
-                                    <CardTitle className="text-lg">Applicant Information</CardTitle>
-                                  </CardHeader>
-                                  <CardContent className="space-y-3">
-                                    <div className="flex justify-between">
-                                      <span className="text-gray-600">Name:</span>
-                                      <span className="font-semibold">{selectedLoan.applicantName}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <span className="text-gray-600">Business:</span>
-                                      <span className="font-semibold">{selectedLoan.businessName}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                      <span className="text-gray-600">Location:</span>
-                                      <span className="font-semibold">{selectedLoan.location}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                      <span className="text-gray-600">Phone:</span>
-                                      <span className="font-semibold flex items-center">
-                                        <Phone className="w-4 h-4 mr-1" />
-                                        {selectedLoan.phone}
-                                      </span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                      <span className="text-gray-600">Email:</span>
-                                      <span className="font-semibold flex items-center">
-                                        <Mail className="w-4 h-4 mr-1" />
-                                        {selectedLoan.email}
-                                      </span>
-                                    </div>
-                                  </CardContent>
-                                </Card>
-                              </div>
-                            </TabsContent>
-                            
-                            <TabsContent value="documents">
-                              <Card>
-                                <CardHeader>
-                                  <CardTitle>Uploaded Documents</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                  <div className="grid grid-cols-2 gap-4">
-                                    {selectedLoan.documents.map((doc: string, index: number) => (
-                                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                                        <div className="flex items-center">
-                                          <FileText className="w-5 h-5 text-blue-600 mr-2" />
-                                          <span className="font-medium">{doc}</span>
-                                        </div>
-                                        <Button variant="outline" size="sm">
-                                          <Eye className="w-4 h-4 mr-1" />
-                                          View
-                                        </Button>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            </TabsContent>
-                            
-                            <TabsContent value="risk">
-                              <Card>
-                                <CardHeader>
-                                  <CardTitle>Risk Assessment</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                  <div className="space-y-4">
-                                    <div className="flex items-center justify-between">
-                                      <span className="font-medium">Overall Risk Score:</span>
-                                      <Badge className={getRiskBadge(selectedLoan.riskScore)}>
-                                        {selectedLoan.riskScore}/10
-                                      </Badge>
-                                    </div>
-                                    <div className="space-y-2">
-                                      <div className="flex justify-between">
-                                        <span>Credit History:</span>
-                                        <span className="text-green-600 font-medium">Good</span>
-                                      </div>
-                                      <div className="flex justify-between">
-                                        <span>Business Stability:</span>
-                                        <span className="text-yellow-600 font-medium">Moderate</span>
-                                      </div>
-                                      <div className="flex justify-between">
-                                        <span>Financial Health:</span>
-                                        <span className="text-green-600 font-medium">Strong</span>
-                                      </div>
-                                      <div className="flex justify-between">
-                                        <span>Industry Risk:</span>
-                                        <span className="text-green-600 font-medium">Low</span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            </TabsContent>
-                            
-                            <TabsContent value="actions">
-                              {canTakeAction && selectedLoan.status === 'pending' ? (
-                                <Card>
-                                  <CardHeader>
-                                    <CardTitle>Loan Decision</CardTitle>
-                                    <CardDescription>
-                                      Review the application and take appropriate action
-                                    </CardDescription>
-                                  </CardHeader>
-                                  <CardContent className="space-y-4">
-                                    <Textarea
-                                      placeholder="Add comments for your decision..."
-                                      value={actionComment}
-                                      onChange={(e) => setActionComment(e.target.value)}
-                                      rows={3}
-                                    />
-                                    <div className="flex space-x-4">
-                                      <Button 
-                                        className="bg-green-600 hover:bg-green-700"
-                                        onClick={() => handleLoanAction(selectedLoan.id, 'approve')}
-                                      >
-                                        <CheckCircle className="w-4 h-4 mr-2" />
-                                        Approve Loan
-                                      </Button>
-                                      <Button 
-                                        variant="destructive"
-                                        onClick={() => handleLoanAction(selectedLoan.id, 'reject')}
-                                      >
-                                        <XCircle className="w-4 h-4 mr-2" />
-                                        Reject Loan
-                                      </Button>
-                                      <Button variant="outline">
-                                        <Clock className="w-4 h-4 mr-2" />
-                                        Request More Info
-                                      </Button>
-                                    </div>
-                                  </CardContent>
-                                </Card>
-                              ) : (
-                                <Card>
-                                  <CardContent className="py-8 text-center">
-                                    <p className="text-gray-500">
-                                      {!canTakeAction 
-                                        ? "You don't have permission to take actions on this loan."
-                                        : "No actions available for this loan status."
-                                      }
-                                    </p>
-                                  </CardContent>
-                                </Card>
-                              )}
-                            </TabsContent>
-                          </Tabs>
-                        )}
-                      </DialogContent>
-                    </Dialog>
+                    <div className="space-y-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => navigate(`/loan/${loan.id}`)}
+                      >
+                        <Eye className="w-4 h-4 mr-1" />
+                        View Loan
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => navigate(`/borrower/${loan.id.replace('LN', 'BR')}`)}
+                      >
+                        <User className="w-4 h-4 mr-1" />
+                        View Profile
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

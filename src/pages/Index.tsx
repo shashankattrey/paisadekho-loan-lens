@@ -1,10 +1,10 @@
 
-import React, { useState } from 'react';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { User, Shield, TrendingUp, FileText, AlertCircle } from "lucide-react";
-import Dashboard from "@/components/Dashboard";
 
 const UserRoles = [
   {
@@ -50,17 +50,11 @@ const UserRoles = [
 ];
 
 const Index = () => {
-  const [selectedRole, setSelectedRole] = useState<string | null>(null);
-  const [userInfo, setUserInfo] = useState<any>(null);
+  const navigate = useNavigate();
 
   const handleRoleSelect = (role: any) => {
-    setSelectedRole(role.id);
-    setUserInfo(role);
+    navigate(`/dashboard/${role.id}`);
   };
-
-  if (selectedRole && userInfo) {
-    return <Dashboard userRole={selectedRole} userInfo={userInfo} />;
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
