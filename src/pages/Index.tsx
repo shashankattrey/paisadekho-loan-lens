@@ -1,11 +1,164 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React, { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { User, Shield, TrendingUp, FileText, AlertCircle } from "lucide-react";
+import Dashboard from "@/components/Dashboard";
+
+const UserRoles = [
+  {
+    id: 'admin',
+    title: 'Admin',
+    description: 'Full access to all modules and user management',
+    icon: Shield,
+    color: 'bg-red-500',
+    permissions: ['all']
+  },
+  {
+    id: 'credit_officer',
+    title: 'Credit Officer',
+    description: 'Review loan applications, approve/reject, underwriting',
+    icon: FileText,
+    color: 'bg-blue-500',
+    permissions: ['loans', 'underwriting', 'kyc']
+  },
+  {
+    id: 'risk_manager',
+    title: 'Risk Manager',
+    description: 'Review flagged loans, risk monitoring, manual decisions',
+    icon: AlertCircle,
+    color: 'bg-orange-500',
+    permissions: ['risk', 'underwriting', 'loans']
+  },
+  {
+    id: 'collections_officer',
+    title: 'Collections Officer',
+    description: 'Monitor repayments, overdue accounts, follow-ups',
+    icon: TrendingUp,
+    color: 'bg-green-500',
+    permissions: ['collections', 'disbursement']
+  },
+  {
+    id: 'compliance_officer',
+    title: 'Compliance Officer',
+    description: 'KYC/VKYC approvals, AML alerts, document verification',
+    icon: User,
+    color: 'bg-purple-500',
+    permissions: ['kyc', 'compliance', 'reporting']
+  }
+];
 
 const Index = () => {
+  const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const [userInfo, setUserInfo] = useState<any>(null);
+
+  const handleRoleSelect = (role: any) => {
+    setSelectedRole(role.id);
+    setUserInfo(role);
+  };
+
+  if (selectedRole && userInfo) {
+    return <Dashboard userRole={selectedRole} userInfo={userInfo} />;
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="flex items-center justify-center mb-6">
+            <div className="bg-blue-600 text-white p-3 rounded-lg mr-4">
+              <Shield className="w-8 h-8" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900">Paisadekho</h1>
+              <p className="text-blue-600 font-semibold">NBFC Admin Dashboard</p>
+            </div>
+          </div>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Secure, scalable admin portal for SME lending operations management
+          </p>
+        </div>
+
+        {/* Role Selection */}
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl font-semibold text-center mb-8 text-gray-800">
+            Select Your Role to Continue
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {UserRoles.map((role) => {
+              const IconComponent = role.icon;
+              return (
+                <Card 
+                  key={role.id} 
+                  className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-2 hover:border-blue-300"
+                  onClick={() => handleRoleSelect(role)}
+                >
+                  <CardHeader className="text-center pb-4">
+                    <div className={`${role.color} w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-white`}>
+                      <IconComponent className="w-8 h-8" />
+                    </div>
+                    <CardTitle className="text-xl font-semibold">{role.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="text-center text-gray-600 mb-4">
+                      {role.description}
+                    </CardDescription>
+                    <div className="flex flex-wrap gap-2 justify-center">
+                      {role.permissions.slice(0, 3).map((permission) => (
+                        <Badge key={permission} variant="secondary" className="text-xs">
+                          {permission.charAt(0).toUpperCase() + permission.slice(1)}
+                        </Badge>
+                      ))}
+                    </div>
+                    <Button className="w-full mt-4 bg-blue-600 hover:bg-blue-700">
+                      Access Dashboard
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Features Overview */}
+        <div className="mt-16 max-w-6xl mx-auto">
+          <h3 className="text-2xl font-semibold text-center mb-8 text-gray-800">
+            Platform Features
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="text-center p-6 bg-white rounded-lg shadow-sm border">
+              <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                <FileText className="w-6 h-6 text-blue-600" />
+              </div>
+              <h4 className="font-semibold mb-2">Loan Management</h4>
+              <p className="text-sm text-gray-600">Complete loan lifecycle management from application to closure</p>
+            </div>
+            <div className="text-center p-6 bg-white rounded-lg shadow-sm border">
+              <div className="bg-orange-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                <AlertCircle className="w-6 h-6 text-orange-600" />
+              </div>
+              <h4 className="font-semibold mb-2">Risk Assessment</h4>
+              <p className="text-sm text-gray-600">Advanced risk scoring and manual underwriting capabilities</p>
+            </div>
+            <div className="text-center p-6 bg-white rounded-lg shadow-sm border">
+              <div className="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                <TrendingUp className="w-6 h-6 text-green-600" />
+              </div>
+              <h4 className="font-semibold mb-2">Collections</h4>
+              <p className="text-sm text-gray-600">Efficient collections management and overdue tracking</p>
+            </div>
+            <div className="text-center p-6 bg-white rounded-lg shadow-sm border">
+              <div className="bg-purple-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                <User className="w-6 h-6 text-purple-600" />
+              </div>
+              <h4 className="font-semibold mb-2">Compliance</h4>
+              <p className="text-sm text-gray-600">KYC verification and regulatory compliance monitoring</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
