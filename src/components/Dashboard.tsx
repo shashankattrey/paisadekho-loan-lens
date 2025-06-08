@@ -9,6 +9,9 @@ import Collections from "@/components/Collections";
 import KYCCompliance from "@/components/KYCCompliance";
 import FinancialReporting from "@/components/FinancialReporting";
 import UserManagement from "@/components/UserManagement";
+import RiskAnalytics from "@/components/RiskAnalytics";
+import CreditScoring from "@/components/CreditScoring";
+import FraudDetection from "@/components/FraudDetection";
 
 interface DashboardProps {
   userRole: string;
@@ -34,6 +37,12 @@ const Dashboard: React.FC<DashboardProps> = ({ userRole, userInfo }) => {
         return <FinancialReporting userRole={userRole} />;
       case 'users':
         return <UserManagement userRole={userRole} />;
+      case 'risk-analytics':
+        return <RiskAnalytics userRole={userRole} />;
+      case 'credit-scoring':
+        return <CreditScoring userRole={userRole} />;
+      case 'fraud-detection':
+        return <FraudDetection userRole={userRole} />;
       default:
         return <DashboardHome userRole={userRole} />;
     }
