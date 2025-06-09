@@ -52,6 +52,7 @@ const mockUsers = [
     is2FAEnabled: false,
     loginAttempts: 0,
     isLocked: false,
+    lockoutTime: undefined,
   },
   {
     id: 'CRO001',
@@ -65,6 +66,7 @@ const mockUsers = [
     is2FAEnabled: false,
     loginAttempts: 0,
     isLocked: false,
+    lockoutTime: undefined,
   },
   {
     id: 'RSK001',
@@ -78,6 +80,7 @@ const mockUsers = [
     is2FAEnabled: false,
     loginAttempts: 0,
     isLocked: false,
+    lockoutTime: undefined,
   },
   {
     id: 'COL001',
@@ -91,6 +94,7 @@ const mockUsers = [
     is2FAEnabled: false,
     loginAttempts: 0,
     isLocked: false,
+    lockoutTime: undefined,
   },
   {
     id: 'COM001',
@@ -104,6 +108,7 @@ const mockUsers = [
     is2FAEnabled: false,
     loginAttempts: 0,
     isLocked: false,
+    lockoutTime: undefined,
   },
 ];
 

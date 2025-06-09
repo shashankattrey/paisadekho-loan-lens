@@ -10,6 +10,7 @@ import LoginPage from "./components/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
 import LoanDetailsPage from "./pages/LoanDetailsPage";
 import BorrowerProfilePage from "./pages/BorrowerProfilePage";
+import LoanApplicationPage from "./pages/LoanApplicationPage";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -38,6 +39,11 @@ const App = () => (
             <Route path="/loan/:loanId" element={
               <ProtectedRoute requiredPermission="loans">
                 <LoanDetailsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/loan-application/:appId" element={
+              <ProtectedRoute requiredPermission="loans">
+                <LoanApplicationPage />
               </ProtectedRoute>
             } />
             <Route path="/borrower/:borrowerId" element={

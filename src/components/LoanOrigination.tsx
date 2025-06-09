@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -440,10 +439,12 @@ const LoanOrigination: React.FC<LoanOriginationProps> = ({ userRole }) => {
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => navigate(`/loan-application/${app.id}`)}
+                        asChild
                       >
-                        <Eye className="w-4 h-4 mr-1" />
-                        View Details
+                        <Link to={`/loan-application/${app.id}`}>
+                          <Eye className="w-4 h-4 mr-1" />
+                          View Details
+                        </Link>
                       </Button>
                       {app.status === 'in_review' && (
                         <div className="flex space-x-1">
