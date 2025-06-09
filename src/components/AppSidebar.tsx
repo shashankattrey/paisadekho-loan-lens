@@ -126,11 +126,11 @@ const AppSidebar: React.FC<AppSidebarProps> = ({
         <div className="flex items-center space-x-3 mb-4">
           <Avatar className="w-10 h-10">
             <AvatarFallback className="bg-gray-200 text-gray-700">
-              {userInfo.title.charAt(0)}
+              {userInfo?.name ? userInfo.name.charAt(0) : 'U'}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1">
-            <p className="font-medium text-sm text-gray-900">{userInfo.title}</p>
+            <p className="font-medium text-sm text-gray-900">{userInfo?.name || 'User'}</p>
             <p className="text-xs text-gray-500">Active Session</p>
           </div>
         </div>
