@@ -1,26 +1,33 @@
+
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Search,
+  Filter,
+  Plus,
   Eye,
-  User,
-  MapPin,
-  Phone,
-  Mail,
-  Download,
+  Clock,
   CheckCircle,
   XCircle,
   AlertTriangle,
-  FileText,
-  Clock,
-  Filter,
+  User,
+  CreditCard,
+  MapPin,
+  Phone,
 } from "lucide-react";
 
 interface LoanOriginationProps {
