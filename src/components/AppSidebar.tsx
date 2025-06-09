@@ -25,6 +25,11 @@ import {
   Users,
   Shield,
   LogOut,
+  PlusCircle,
+  CreditCard,
+  Search,
+  Settings,
+  Bell,
 } from "lucide-react";
 
 interface AppSidebarProps {
@@ -37,34 +42,46 @@ interface AppSidebarProps {
 const menuItems = {
   admin: [
     { id: 'dashboard', title: 'Dashboard', icon: LayoutDashboard },
+    { id: 'loan-origination', title: 'Loan Origination', icon: PlusCircle },
     { id: 'loans', title: 'Loan Management', icon: FileText },
+    { id: 'disbursement', title: 'Disbursement', icon: CreditCard },
     { id: 'risk', title: 'Risk & Underwriting', icon: AlertCircle },
     { id: 'collections', title: 'Collections', icon: TrendingUp },
     { id: 'kyc', title: 'KYC & Compliance', icon: User },
+    { id: 'fraud-detection', title: 'Fraud Detection', icon: Search },
     { id: 'reporting', title: 'Financial Reports', icon: BarChart3 },
     { id: 'users', title: 'User Management', icon: Users },
+    { id: 'risk-analytics', title: 'Risk Analytics', icon: BarChart3 },
+    { id: 'credit-scoring', title: 'Credit Scoring', icon: AlertCircle },
   ],
   credit_officer: [
     { id: 'dashboard', title: 'Dashboard', icon: LayoutDashboard },
+    { id: 'loan-origination', title: 'Loan Origination', icon: PlusCircle },
     { id: 'loans', title: 'Loan Management', icon: FileText },
+    { id: 'disbursement', title: 'Disbursement', icon: CreditCard },
     { id: 'risk', title: 'Risk & Underwriting', icon: AlertCircle },
     { id: 'kyc', title: 'KYC & Compliance', icon: User },
   ],
   risk_manager: [
     { id: 'dashboard', title: 'Dashboard', icon: LayoutDashboard },
     { id: 'risk', title: 'Risk & Underwriting', icon: AlertCircle },
+    { id: 'risk-analytics', title: 'Risk Analytics', icon: BarChart3 },
+    { id: 'credit-scoring', title: 'Credit Scoring', icon: AlertCircle },
+    { id: 'fraud-detection', title: 'Fraud Detection', icon: Search },
     { id: 'loans', title: 'Loan Management', icon: FileText },
     { id: 'reporting', title: 'Risk Reports', icon: BarChart3 },
   ],
   collections_officer: [
     { id: 'dashboard', title: 'Dashboard', icon: LayoutDashboard },
     { id: 'collections', title: 'Collections', icon: TrendingUp },
+    { id: 'disbursement', title: 'Disbursement', icon: CreditCard },
     { id: 'loans', title: 'Loan Management', icon: FileText },
     { id: 'reporting', title: 'Collections Reports', icon: BarChart3 },
   ],
   compliance_officer: [
     { id: 'dashboard', title: 'Dashboard', icon: LayoutDashboard },
     { id: 'kyc', title: 'KYC & Compliance', icon: User },
+    { id: 'fraud-detection', title: 'Fraud Detection', icon: Search },
     { id: 'reporting', title: 'Compliance Reports', icon: BarChart3 },
   ],
 };
@@ -95,7 +112,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({
       <SidebarContent className="p-4">
         <SidebarGroup>
           <SidebarGroupLabel className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
-            Navigation
+            Main Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -117,6 +134,30 @@ const AppSidebar: React.FC<AppSidebarProps> = ({
                   </SidebarMenuItem>
                 );
               })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Quick Actions */}
+        <SidebarGroup className="mt-6">
+          <SidebarGroupLabel className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
+            Quick Actions
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton className="w-full justify-start space-x-3 p-3 rounded-lg transition-colors hover:bg-gray-100 text-gray-700">
+                  <Bell className="w-5 h-5" />
+                  <span className="font-medium">Notifications</span>
+                  <span className="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-1">3</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton className="w-full justify-start space-x-3 p-3 rounded-lg transition-colors hover:bg-gray-100 text-gray-700">
+                  <Settings className="w-5 h-5" />
+                  <span className="font-medium">Settings</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

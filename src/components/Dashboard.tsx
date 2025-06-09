@@ -4,6 +4,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import DashboardLayout from "@/components/DashboardLayout";
 import DashboardHome from "@/components/DashboardHome";
 import LoanManagement from "@/components/LoanManagement";
+import LoanOrigination from "@/components/LoanOrigination";
+import DisbursementModule from "@/components/DisbursementModule";
 import RiskUnderwriting from "@/components/RiskUnderwriting";
 import Collections from "@/components/Collections";
 import KYCCompliance from "@/components/KYCCompliance";
@@ -31,23 +33,27 @@ const Dashboard: React.FC<DashboardProps> = () => {
       case 'dashboard':
         return <DashboardHome userRole={user.role} />;
       case 'loans':
-        return hasPermission('loans') ? <LoanManagement userRole={user.role} /> : <div>Access Denied</div>;
+        return hasPermission('loans') ? <LoanManagement userRole={user.role} /> : <div className="p-8 text-center text-gray-500">Access Denied</div>;
+      case 'loan-origination':
+        return hasPermission('loans') ? <LoanOrigination userRole={user.role} /> : <div className="p-8 text-center text-gray-500">Access Denied</div>;
+      case 'disbursement':
+        return hasPermission('disbursement') ? <DisbursementModule userRole={user.role} /> : <div className="p-8 text-center text-gray-500">Access Denied</div>;
       case 'risk':
-        return hasPermission('risk') ? <RiskUnderwriting userRole={user.role} /> : <div>Access Denied</div>;
+        return hasPermission('risk') ? <RiskUnderwriting userRole={user.role} /> : <div className="p-8 text-center text-gray-500">Access Denied</div>;
       case 'collections':
-        return hasPermission('collections') ? <Collections userRole={user.role} /> : <div>Access Denied</div>;
+        return hasPermission('collections') ? <Collections userRole={user.role} /> : <div className="p-8 text-center text-gray-500">Access Denied</div>;
       case 'kyc':
-        return hasPermission('kyc') ? <KYCCompliance userRole={user.role} /> : <div>Access Denied</div>;
+        return hasPermission('kyc') ? <KYCCompliance userRole={user.role} /> : <div className="p-8 text-center text-gray-500">Access Denied</div>;
       case 'reporting':
-        return hasPermission('reporting') ? <FinancialReporting userRole={user.role} /> : <div>Access Denied</div>;
+        return hasPermission('reporting') ? <FinancialReporting userRole={user.role} /> : <div className="p-8 text-center text-gray-500">Access Denied</div>;
       case 'users':
-        return hasPermission('all') ? <UserManagement userRole={user.role} /> : <div>Access Denied</div>;
+        return hasPermission('all') ? <UserManagement userRole={user.role} /> : <div className="p-8 text-center text-gray-500">Access Denied</div>;
       case 'risk-analytics':
-        return hasPermission('analytics') || hasPermission('risk') ? <RiskAnalytics userRole={user.role} /> : <div>Access Denied</div>;
+        return hasPermission('analytics') || hasPermission('risk') ? <RiskAnalytics userRole={user.role} /> : <div className="p-8 text-center text-gray-500">Access Denied</div>;
       case 'credit-scoring':
-        return hasPermission('underwriting') || hasPermission('risk') ? <CreditScoring userRole={user.role} /> : <div>Access Denied</div>;
+        return hasPermission('underwriting') || hasPermission('risk') ? <CreditScoring userRole={user.role} /> : <div className="p-8 text-center text-gray-500">Access Denied</div>;
       case 'fraud-detection':
-        return hasPermission('risk') || hasPermission('all') ? <FraudDetection userRole={user.role} /> : <div>Access Denied</div>;
+        return hasPermission('fraud') || hasPermission('all') ? <FraudDetection userRole={user.role} /> : <div className="p-8 text-center text-gray-500">Access Denied</div>;
       default:
         return <DashboardHome userRole={user.role} />;
     }
