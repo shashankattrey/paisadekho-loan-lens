@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
-import { SidebarProvider } from "@/components/ui/sidebar";
-import AppSidebar from "@/components/AppSidebar";
+import { useAuth } from '@/contexts/AuthContext';
+import DashboardLayout from "@/components/DashboardLayout";
 import DashboardHome from "@/components/DashboardHome";
 import LoanManagement from "@/components/LoanManagement";
 import RiskUnderwriting from "@/components/RiskUnderwriting";
@@ -14,54 +14,49 @@ import CreditScoring from "@/components/CreditScoring";
 import FraudDetection from "@/components/FraudDetection";
 
 interface DashboardProps {
-  userRole: string;
-  userInfo: any;
+  userRole?: string;
+  userInfo?: any;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ userRole, userInfo }) => {
+const Dashboard: React.FC<DashboardProps> = () => {
+  const { user, hasPermission } = useAuth();
   const [activeModule, setActiveModule] = useState('dashboard');
+
+  if (!user) {
+    return null;
+  }
 
   const renderActiveModule = () => {
     switch (activeModule) {
       case 'dashboard':
-        return <DashboardHome userRole={userRole} />;
+        return <DashboardHome userRole={user.role} />;
       case 'loans':
-        return <LoanManagement userRole={userRole} />;
+        return hasPermission('loans') ? <LoanManagement userRole={user.role} /> : <div>Access Denied</div>;
       case 'risk':
-        return <RiskUnderwriting userRole={userRole} />;
+        return hasPermission('risk') ? <RiskUnderwriting userRole={user.role} /> : <div>Access Denied</div>;
       case 'collections':
-        return <Collections userRole={userRole} />;
+        return hasPermission('collections') ? <Collections userRole={user.role} /> : <div>Access Denied</div>;
       case 'kyc':
-        return <KYCCompliance userRole={userRole} />;
+        return hasPermission('kyc') ? <KYCCompliance userRole={user.role} /> : <div>Access Denied</div>;
       case 'reporting':
-        return <FinancialReporting userRole={userRole} />;
+        return hasPermission('reporting') ? <FinancialReporting userRole={user.role} /> : <div>Access Denied</div>;
       case 'users':
-        return <UserManagement userRole={userRole} />;
+        return hasPermission('all') ? <UserManagement userRole={user.role} /> : <div>Access Denied</div>;
       case 'risk-analytics':
-        return <RiskAnalytics userRole={userRole} />;
+        return hasPermission('analytics') || hasPermission('risk') ? <RiskAnalytics userRole={user.role} /> : <div>Access Denied</div>;
       case 'credit-scoring':
-        return <CreditScoring userRole={userRole} />;
+        return hasPermission('underwriting') || hasPermission('risk') ? <CreditScoring userRole={user.role} /> : <div>Access Denied</div>;
       case 'fraud-detection':
-        return <FraudDetection userRole={userRole} />;
+        return hasPermission('risk') || hasPermission('all') ? <FraudDetection userRole={user.role} /> : <div>Access Denied</div>;
       default:
-        return <DashboardHome userRole={userRole} />;
+        return <DashboardHome userRole={user.role} />;
     }
   };
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gray-50">
-        <AppSidebar 
-          userRole={userRole} 
-          userInfo={userInfo}
-          activeModule={activeModule}
-          setActiveModule={setActiveModule}
-        />
-        <main className="flex-1 p-6 overflow-auto">
-          {renderActiveModule()}
-        </main>
-      </div>
-    </SidebarProvider>
+    <DashboardLayout activeModule={activeModule} setActiveModule={setActiveModule}>
+      {renderActiveModule()}
+    </DashboardLayout>
   );
 };
 

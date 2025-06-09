@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { User, Shield, TrendingUp, FileText, AlertCircle } from "lucide-react";
+import { User, Shield, TrendingUp, FileText, AlertCircle, LogIn } from "lucide-react";
 
 const UserRoles = [
   {
@@ -51,9 +51,22 @@ const UserRoles = [
 
 const Index = () => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+
+  const handleGetStarted = () => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    } else {
+      navigate('/login');
+    }
+  };
 
   const handleRoleSelect = (role: any) => {
-    navigate(`/dashboard/${role.id}`);
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    } else {
+      navigate('/login');
+    }
   };
 
   return (
@@ -70,15 +83,27 @@ const Index = () => {
               <p className="text-blue-600 font-semibold">NBFC Admin Dashboard</p>
             </div>
           </div>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
             Secure, scalable admin portal for SME lending operations management
           </p>
+          
+          <div className="flex justify-center space-x-4">
+            <Button onClick={handleGetStarted} className="bg-blue-600 hover:bg-blue-700" size="lg">
+              <LogIn className="w-4 h-4 mr-2" />
+              {isAuthenticated ? 'Go to Dashboard' : 'Sign In to Continue'}
+            </Button>
+            {!isAuthenticated && (
+              <Button variant="outline" onClick={() => navigate('/login')} size="lg">
+                View Demo Credentials
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Role Selection */}
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl font-semibold text-center mb-8 text-gray-800">
-            Select Your Role to Continue
+            Role-Based Access Control
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -108,7 +133,7 @@ const Index = () => {
                       ))}
                     </div>
                     <Button className="w-full mt-4 bg-blue-600 hover:bg-blue-700">
-                      Access Dashboard
+                      {isAuthenticated ? 'Access Dashboard' : 'Sign In Required'}
                     </Button>
                   </CardContent>
                 </Card>
