@@ -11,6 +11,11 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, fullName: string, role?: string) => Promise<void>;
   signOut: () => Promise<void>;
+  login: (email: string, password: string, otpCode?: string) => Promise<{ success: boolean; requires2FA?: boolean; message?: string }>;
+  logout: () => Promise<void>;
+  resetPassword: (email: string) => Promise<boolean>;
+  loginSessions: Array<{ sessionId: string; loginTime: string; isActive: boolean }>;
+  hasPermission: (permission: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -26,6 +31,7 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<(User & { profile?: Profile }) | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [loginSessions] = useState<Array<{ sessionId: string; loginTime: string; isActive: boolean }>>([]);
 
   useEffect(() => {
     // Get initial session
@@ -78,6 +84,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const login = async (email: string, password: string, otpCode?: string) => {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        return { success: false, message: error.message };
+      }
+
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: 'Login failed' };
+    }
+  };
+
   const signUp = async (email: string, password: string, fullName: string, role: string = 'credit_officer') => {
     const { error } = await supabase.auth.signUp({
       email,
@@ -102,6 +125,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const logout = async () => {
+    await signOut();
+  };
+
+  const resetPassword = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      return !error;
+    } catch {
+      return false;
+    }
+  };
+
+  const hasPermission = (permission: string) => {
+    if (!user?.profile) return false;
+
+    const rolePermissions = {
+      admin: ['all', 'users', 'loans', 'disbursement', 'risk', 'collections', 'kyc', 'reporting', 'analytics', 'underwriting', 'fraud'],
+      credit_officer: ['loans', 'disbursement', 'kyc'],
+      risk_manager: ['risk', 'analytics', 'underwriting'],
+      collections_officer: ['collections'],
+      compliance_officer: ['kyc', 'reporting', 'fraud']
+    };
+
+    const userRole = user.profile.role;
+    const permissions = rolePermissions[userRole] || [];
+    
+    return permissions.includes(permission) || permissions.includes('all');
+  };
+
   const value = {
     user,
     isAuthenticated: !!user,
@@ -109,6 +162,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signIn,
     signUp,
     signOut,
+    login,
+    logout,
+    resetPassword,
+    loginSessions,
+    hasPermission,
   };
 
   return (

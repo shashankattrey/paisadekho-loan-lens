@@ -8,7 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Bell, Settings, LogOut, User, Shield } from "lucide-react";
 
 const Header = () => {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
 
   const getRoleBadge = (role: string) => {
     const variants = {
@@ -23,6 +23,14 @@ const Header = () => {
 
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
+  const getUserName = () => {
+    return user?.profile?.full_name || user?.email || 'User';
+  };
+
+  const getUserRole = () => {
+    return user?.profile?.role || 'credit_officer';
   };
 
   return (
@@ -53,13 +61,13 @@ const Header = () => {
               <Button variant="ghost" className="flex items-center space-x-3 px-3 py-2">
                 <Avatar className="w-8 h-8">
                   <AvatarFallback className="bg-blue-100 text-blue-600">
-                    {user ? getInitials(user.name) : 'U'}
+                    {user ? getInitials(getUserName()) : 'U'}
                   </AvatarFallback>
                 </Avatar>
                 <div className="text-left">
-                  <div className="font-medium text-sm">{user?.name}</div>
-                  <Badge className={`text-xs ${user ? getRoleBadge(user.role) : ''}`}>
-                    {user?.role.replace('_', ' ').toUpperCase()}
+                  <div className="font-medium text-sm">{getUserName()}</div>
+                  <Badge className={`text-xs ${user ? getRoleBadge(getUserRole()) : ''}`}>
+                    {getUserRole().replace('_', ' ').toUpperCase()}
                   </Badge>
                 </div>
               </Button>
@@ -67,10 +75,10 @@ const Header = () => {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>
                 <div>
-                  <div className="font-medium">{user?.name}</div>
+                  <div className="font-medium">{getUserName()}</div>
                   <div className="text-sm text-gray-500">{user?.email}</div>
                   <div className="text-xs text-gray-400 mt-1">
-                    Last login: {user?.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'Never'}
+                    Last login: {user?.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : 'Never'}
                   </div>
                 </div>
               </DropdownMenuLabel>
@@ -84,7 +92,7 @@ const Header = () => {
                 Preferences
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={logout} className="text-red-600">
+              <DropdownMenuItem onClick={signOut} className="text-red-600">
                 <LogOut className="w-4 h-4 mr-2" />
                 Sign Out
               </DropdownMenuItem>

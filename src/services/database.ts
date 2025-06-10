@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 
 // Types based on our database schema
 export interface Customer {
@@ -9,12 +10,7 @@ export interface Customer {
   phone: string;
   aadhaar_number?: string;
   pan_number?: string;
-  address?: {
-    street: string;
-    city: string;
-    state: string;
-    pincode: string;
-  };
+  address?: Json;
   business_name?: string;
   business_type?: string;
   business_vintage?: number;
@@ -75,7 +71,7 @@ export const DatabaseService = {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return data as LoanApplication[];
+    return data as any[];
   },
 
   async getLoanApplication(id: string) {
@@ -90,10 +86,10 @@ export const DatabaseService = {
       .single();
 
     if (error) throw error;
-    return data as LoanApplication;
+    return data as any;
   },
 
-  async createLoanApplication(applicationData: Partial<LoanApplication>) {
+  async createLoanApplication(applicationData: any) {
     // Generate application number
     const { data: appNumber } = await supabase.rpc('generate_application_number');
     
@@ -110,7 +106,7 @@ export const DatabaseService = {
     return data;
   },
 
-  async updateLoanApplication(id: string, updates: Partial<LoanApplication>) {
+  async updateLoanApplication(id: string, updates: any) {
     const { data, error } = await supabase
       .from('loan_applications')
       .update(updates)
@@ -144,7 +140,7 @@ export const DatabaseService = {
     return data as Customer;
   },
 
-  async createCustomer(customerData: Partial<Customer>) {
+  async createCustomer(customerData: any) {
     const { data, error } = await supabase
       .from('customers')
       .insert(customerData)
@@ -155,7 +151,7 @@ export const DatabaseService = {
     return data;
   },
 
-  async updateCustomer(id: string, updates: Partial<Customer>) {
+  async updateCustomer(id: string, updates: any) {
     const { data, error } = await supabase
       .from('customers')
       .update(updates)
