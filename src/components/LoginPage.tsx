@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,11 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Eye, EyeOff, AlertCircle, CheckCircle, Lock, Clock } from "lucide-react";
+import { Shield, Eye, EyeOff, AlertCircle, CheckCircle, Lock, Clock, UserPlus } from "lucide-react";
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const { login, resetPassword, loginSessions } = useAuth();
+  const { login, resetPassword, loginSessions, signUp } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [otpCode, setOtpCode] = useState('');
@@ -22,6 +21,12 @@ const LoginPage = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [requires2FA, setRequires2FA] = useState(false);
+
+  // Signup form state
+  const [signupEmail, setSignupEmail] = useState('');
+  const [signupPassword, setSignupPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [role, setRole] = useState('credit_officer');
 
   const demoCredentials = [
     { role: 'Admin', email: 'admin@paisadekho.com', password: 'admin123', color: 'bg-red-100 text-red-800' },
@@ -56,6 +61,27 @@ const LoginPage = () => {
     }
   };
 
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      await signUp(signupEmail, signupPassword, fullName, role);
+      setSuccess('Account created successfully! You can now login.');
+      // Reset form
+      setSignupEmail('');
+      setSignupPassword('');
+      setFullName('');
+      setRole('credit_officer');
+    } catch (err: any) {
+      setError(err.message || 'Signup failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handlePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -82,6 +108,22 @@ const LoginPage = () => {
     setPassword(password);
     setError('');
     setRequires2FA(false);
+  };
+
+  const createAdminUser = async () => {
+    setLoading(true);
+    setError('');
+    setSuccess('');
+    
+    try {
+      await signUp('admin@paisadekho.com', 'admin123', 'Admin User', 'admin');
+      setSuccess('Admin user created! You can now login with admin@paisadekho.com / admin123');
+      fillDemoCredentials('admin@paisadekho.com', 'admin123');
+    } catch (err: any) {
+      setError(err.message || 'Failed to create admin user');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -162,8 +204,9 @@ const LoginPage = () => {
             </CardHeader>
             <CardContent>
               <Tabs defaultValue="login" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
+                <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="login">Login</TabsTrigger>
+                  <TabsTrigger value="signup">Sign Up</TabsTrigger>
                   <TabsTrigger value="reset">Reset Password</TabsTrigger>
                 </TabsList>
 
@@ -254,6 +297,77 @@ const LoginPage = () => {
                   </form>
                 </TabsContent>
 
+                <TabsContent value="signup" className="space-y-4">
+                  <form onSubmit={handleSignup} className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Full Name
+                      </label>
+                      <Input
+                        type="text"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        placeholder="Enter your full name"
+                        required
+                        className="w-full"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Email Address
+                      </label>
+                      <Input
+                        type="email"
+                        value={signupEmail}
+                        onChange={(e) => setSignupEmail(e.target.value)}
+                        placeholder="Enter your email"
+                        required
+                        className="w-full"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Password
+                      </label>
+                      <Input
+                        type="password"
+                        value={signupPassword}
+                        onChange={(e) => setSignupPassword(e.target.value)}
+                        placeholder="Enter your password"
+                        required
+                        className="w-full"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Role
+                      </label>
+                      <select
+                        value={role}
+                        onChange={(e) => setRole(e.target.value)}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2"
+                      >
+                        <option value="credit_officer">Credit Officer</option>
+                        <option value="risk_manager">Risk Manager</option>
+                        <option value="collections_officer">Collections Officer</option>
+                        <option value="compliance_officer">Compliance Officer</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                    </div>
+
+                    <Button
+                      type="submit"
+                      className="w-full bg-green-600 hover:bg-green-700"
+                      disabled={loading}
+                    >
+                      {loading ? 'Creating Account...' : 'Sign Up'}
+                    </Button>
+                  </form>
+                </TabsContent>
+
                 <TabsContent value="reset" className="space-y-4">
                   <form onSubmit={handlePasswordReset} className="space-y-4">
                     <div>
@@ -270,20 +384,6 @@ const LoginPage = () => {
                       />
                     </div>
 
-                    {error && (
-                      <Alert>
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertDescription>{error}</AlertDescription>
-                      </Alert>
-                    )}
-
-                    {success && (
-                      <Alert className="border-green-200 bg-green-50">
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                        <AlertDescription className="text-green-800">{success}</AlertDescription>
-                      </Alert>
-                    )}
-
                     <Button
                       type="submit"
                       className="w-full bg-blue-600 hover:bg-blue-700"
@@ -297,12 +397,34 @@ const LoginPage = () => {
             </CardContent>
           </Card>
 
+          {/* Quick Admin Setup */}
+          <Card className="mt-4">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center">
+                <UserPlus className="w-5 h-5 mr-2" />
+                Quick Admin Setup
+              </CardTitle>
+              <CardDescription>
+                Create the admin user to get started immediately
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                onClick={createAdminUser}
+                className="w-full bg-red-600 hover:bg-red-700"
+                disabled={loading}
+              >
+                {loading ? 'Creating Admin...' : 'Create Admin User'}
+              </Button>
+            </CardContent>
+          </Card>
+
           {/* Demo Credentials */}
-          <Card className="mt-6">
+          <Card className="mt-4">
             <CardHeader>
               <CardTitle className="text-lg">Demo Credentials</CardTitle>
               <CardDescription>
-                Click on any role to auto-fill login credentials
+                Click on any role to auto-fill login credentials (create accounts first using Sign Up)
               </CardDescription>
             </CardHeader>
             <CardContent>
