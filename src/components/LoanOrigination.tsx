@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Table,
@@ -19,136 +18,31 @@ import {
 import {
   Search,
   Filter,
-  Plus,
   Eye,
   Clock,
   CheckCircle,
   XCircle,
   AlertTriangle,
-  User,
-  CreditCard,
-  MapPin,
   Phone,
+  MapPin,
   Download,
+  Loader2,
 } from "lucide-react";
+import { useLoanApplications, useUpdateLoanApplication } from "@/hooks/useDatabase";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface LoanOriginationProps {
   userRole: string;
 }
 
-const mockApplications = [
-  {
-    id: 'APP001',
-    applicantName: 'Rajesh Kumar',
-    businessName: 'Kumar Electronics',
-    phone: '+91 98765 43210',
-    email: 'rajesh.kumar@email.com',
-    location: 'Noida, UP',
-    pincode: '201301',
-    amount: 25000,
-    tenure: 18,
-    purpose: 'Working Capital',
-    status: 'submitted',
-    submittedDate: '2024-01-15T10:30:00Z',
-    lastUpdated: '2024-01-15T10:30:00Z',
-    riskScore: 7.2,
-    cibilScore: 742,
-    monthlyIncome: 45000,
-    businessVintage: 36,
-    kycStatus: 'pending',
-    vkycStatus: 'pending',
-    assignedTo: 'CRO001',
-    priority: 'normal',
-    documents: ['pan', 'aadhaar', 'bank_statement'],
-    missingDocs: ['gst_certificate'],
-  },
-  {
-    id: 'APP002',
-    applicantName: 'Priya Sharma',
-    businessName: 'Sharma Textiles',
-    phone: '+91 87654 32109',
-    email: 'priya.sharma@email.com',
-    location: 'Delhi, DL',
-    pincode: '110001',
-    amount: 35000,
-    tenure: 24,
-    purpose: 'Inventory Purchase',
-    status: 'in_review',
-    submittedDate: '2024-01-12T14:20:00Z',
-    lastUpdated: '2024-01-16T09:15:00Z',
-    riskScore: 8.5,
-    cibilScore: 768,
-    monthlyIncome: 62000,
-    businessVintage: 48,
-    kycStatus: 'verified',
-    vkycStatus: 'verified',
-    assignedTo: 'CRO001',
-    priority: 'high',
-    documents: ['pan', 'aadhaar', 'bank_statement', 'gst_certificate'],
-    missingDocs: [],
-  },
-  {
-    id: 'APP003',
-    applicantName: 'Mohammed Ali',
-    businessName: 'Ali Trading Co.',
-    phone: '+91 76543 21098',
-    email: 'mohammed.ali@email.com',
-    location: 'Bangalore, KA',
-    pincode: '560001',
-    amount: 15000,
-    tenure: 12,
-    purpose: 'Equipment Purchase',
-    status: 'approved',
-    submittedDate: '2024-01-18T16:45:00Z',
-    lastUpdated: '2024-01-20T11:30:00Z',
-    riskScore: 6.8,
-    cibilScore: 695,
-    monthlyIncome: 38000,
-    businessVintage: 24,
-    kycStatus: 'verified',
-    vkycStatus: 'verified',
-    assignedTo: 'RSK001',
-    priority: 'normal',
-    documents: ['pan', 'aadhaar', 'bank_statement', 'gst_certificate'],
-    missingDocs: [],
-    approvalAmount: 12000,
-    approvalConditions: ['Provide additional collateral'],
-  },
-  {
-    id: 'APP004',
-    applicantName: 'Sunita Devi',
-    businessName: 'Sunita Saree Center',
-    phone: '+91 98765 12345',
-    email: 'sunita.devi@email.com',
-    location: 'Mumbai, MH',
-    pincode: '400001',
-    amount: 40000,
-    tenure: 36,
-    purpose: 'Shop Expansion',
-    status: 'rejected',
-    submittedDate: '2024-01-10T08:15:00Z',
-    lastUpdated: '2024-01-18T15:45:00Z',
-    riskScore: 4.2,
-    cibilScore: 625,
-    monthlyIncome: 28000,
-    businessVintage: 12,
-    kycStatus: 'verified',
-    vkycStatus: 'failed',
-    assignedTo: 'RSK001',
-    priority: 'low',
-    documents: ['pan', 'aadhaar'],
-    missingDocs: ['bank_statement', 'gst_certificate'],
-    rejectionReason: 'Low CIBIL score and insufficient business vintage',
-  },
-];
-
 const LoanOrigination: React.FC<LoanOriginationProps> = ({ userRole }) => {
   const navigate = useNavigate();
-  const [applications, setApplications] = useState(mockApplications);
+  const { data: applications, isLoading, error } = useLoanApplications();
+  const updateApplication = useUpdateLoanApplication();
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
-  const [assigneeFilter, setAssigneeFilter] = useState('all');
   const [selectedApplication, setSelectedApplication] = useState<string | null>(null);
   const [actionType, setActionType] = useState<'approve' | 'reject' | 'request_docs' | null>(null);
   const [remarks, setRemarks] = useState('');
@@ -159,6 +53,8 @@ const LoanOrigination: React.FC<LoanOriginationProps> = ({ userRole }) => {
       in_review: 'bg-yellow-100 text-yellow-800 border-yellow-300',
       approved: 'bg-green-100 text-green-800 border-green-300',
       rejected: 'bg-red-100 text-red-800 border-red-300',
+      disbursed: 'bg-purple-100 text-purple-800 border-purple-300',
+      closed: 'bg-gray-100 text-gray-800 border-gray-300',
     };
     return variants[status as keyof typeof variants] || variants.submitted;
   };
@@ -168,6 +64,7 @@ const LoanOrigination: React.FC<LoanOriginationProps> = ({ userRole }) => {
       high: 'bg-red-100 text-red-800 border-red-300',
       normal: 'bg-blue-100 text-blue-800 border-blue-300',
       low: 'bg-gray-100 text-gray-800 border-gray-300',
+      urgent: 'bg-orange-100 text-orange-800 border-orange-300',
     };
     return variants[priority as keyof typeof variants] || variants.normal;
   };
@@ -178,52 +75,51 @@ const LoanOrigination: React.FC<LoanOriginationProps> = ({ userRole }) => {
     return 'bg-red-100 text-red-800 border-red-300';
   };
 
-  const filteredApplications = applications.filter(app => {
-    const matchesSearch = app.applicantName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         app.businessName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         app.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         app.phone.includes(searchTerm) ||
-                         app.pincode.includes(searchTerm);
+  const filteredApplications = applications?.filter(app => {
+    const matchesSearch = app.customer?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         app.customer?.business_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         app.application_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         app.customer?.phone.includes(searchTerm);
     const matchesStatus = statusFilter === 'all' || app.status === statusFilter;
     const matchesPriority = priorityFilter === 'all' || app.priority === priorityFilter;
-    const matchesAssignee = assigneeFilter === 'all' || app.assignedTo === assigneeFilter;
-    return matchesSearch && matchesStatus && matchesPriority && matchesAssignee;
-  });
+    return matchesSearch && matchesStatus && matchesPriority;
+  }) || [];
 
   const handleAction = (appId: string, action: 'approve' | 'reject' | 'request_docs') => {
     setSelectedApplication(appId);
     setActionType(action);
   };
 
-  const submitAction = () => {
+  const submitAction = async () => {
     if (!selectedApplication || !actionType) return;
 
-    const updatedApplications = applications.map(app => {
-      if (app.id === selectedApplication) {
-        const updatedApp = { ...app, lastUpdated: new Date().toISOString() };
-        
-        switch (actionType) {
-          case 'approve':
-            updatedApp.status = 'approved';
-            break;
-          case 'reject':
-            updatedApp.status = 'rejected';
-            updatedApp.rejectionReason = remarks;
-            break;
-          case 'request_docs':
-            // Add logic for requesting additional documents
-            break;
-        }
-        
-        return updatedApp;
-      }
-      return app;
-    });
+    const updates: any = {};
+    
+    switch (actionType) {
+      case 'approve':
+        updates.status = 'approved';
+        break;
+      case 'reject':
+        updates.status = 'rejected';
+        updates.rejection_reason = remarks;
+        break;
+      case 'request_docs':
+        // Add logic for requesting additional documents
+        break;
+    }
 
-    setApplications(updatedApplications);
-    setSelectedApplication(null);
-    setActionType(null);
-    setRemarks('');
+    try {
+      await updateApplication.mutateAsync({
+        id: selectedApplication,
+        updates
+      });
+      
+      setSelectedApplication(null);
+      setActionType(null);
+      setRemarks('');
+    } catch (error) {
+      console.error('Error updating application:', error);
+    }
   };
 
   const getStatusIcon = (status: string) => {
@@ -239,6 +135,35 @@ const LoanOrigination: React.FC<LoanOriginationProps> = ({ userRole }) => {
       default:
         return <Clock className="w-4 h-4" />;
     }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-20" />
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          {[...Array(5)].map((_, i) => (
+            <Skeleton key={i} className="h-24" />
+          ))}
+        </div>
+        <Skeleton className="h-96" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-red-600">Error loading applications: {error.message}</p>
+      </div>
+    );
+  }
+
+  const statusCounts = {
+    submitted: applications?.filter(a => a.status === 'submitted').length || 0,
+    in_review: applications?.filter(a => a.status === 'in_review').length || 0,
+    approved: applications?.filter(a => a.status === 'approved').length || 0,
+    rejected: applications?.filter(a => a.status === 'rejected').length || 0,
   };
 
   return (
@@ -268,7 +193,7 @@ const LoanOrigination: React.FC<LoanOriginationProps> = ({ userRole }) => {
         <Card>
           <CardContent className="p-4">
             <div className="text-center">
-              <p className="text-2xl font-bold text-blue-600">{applications.filter(a => a.status === 'submitted').length}</p>
+              <p className="text-2xl font-bold text-blue-600">{statusCounts.submitted}</p>
               <p className="text-sm text-gray-600">New Applications</p>
             </div>
           </CardContent>
@@ -276,7 +201,7 @@ const LoanOrigination: React.FC<LoanOriginationProps> = ({ userRole }) => {
         <Card>
           <CardContent className="p-4">
             <div className="text-center">
-              <p className="text-2xl font-bold text-yellow-600">{applications.filter(a => a.status === 'in_review').length}</p>
+              <p className="text-2xl font-bold text-yellow-600">{statusCounts.in_review}</p>
               <p className="text-sm text-gray-600">Under Review</p>
             </div>
           </CardContent>
@@ -284,7 +209,7 @@ const LoanOrigination: React.FC<LoanOriginationProps> = ({ userRole }) => {
         <Card>
           <CardContent className="p-4">
             <div className="text-center">
-              <p className="text-2xl font-bold text-green-600">{applications.filter(a => a.status === 'approved').length}</p>
+              <p className="text-2xl font-bold text-green-600">{statusCounts.approved}</p>
               <p className="text-sm text-gray-600">Approved</p>
             </div>
           </CardContent>
@@ -292,7 +217,7 @@ const LoanOrigination: React.FC<LoanOriginationProps> = ({ userRole }) => {
         <Card>
           <CardContent className="p-4">
             <div className="text-center">
-              <p className="text-2xl font-bold text-red-600">{applications.filter(a => a.status === 'rejected').length}</p>
+              <p className="text-2xl font-bold text-red-600">{statusCounts.rejected}</p>
               <p className="text-sm text-gray-600">Rejected</p>
             </div>
           </CardContent>
@@ -301,7 +226,7 @@ const LoanOrigination: React.FC<LoanOriginationProps> = ({ userRole }) => {
           <CardContent className="p-4">
             <div className="text-center">
               <p className="text-2xl font-bold text-purple-600">
-                ₹{applications.filter(a => a.status === 'approved').reduce((sum, app) => sum + (app.approvalAmount || app.amount), 0).toLocaleString()}
+                ₹{applications?.filter(a => a.status === 'approved').reduce((sum, app) => sum + (app.approved_amount || app.amount), 0).toLocaleString() || '0'}
               </p>
               <p className="text-sm text-gray-600">Total Approved</p>
             </div>
@@ -320,7 +245,7 @@ const LoanOrigination: React.FC<LoanOriginationProps> = ({ userRole }) => {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
-                  placeholder="Search by name, business, application ID, phone, or pincode..."
+                  placeholder="Search by name, business, application ID, or phone..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -348,6 +273,7 @@ const LoanOrigination: React.FC<LoanOriginationProps> = ({ userRole }) => {
                 <SelectItem value="high">High</SelectItem>
                 <SelectItem value="normal">Normal</SelectItem>
                 <SelectItem value="low">Low</SelectItem>
+                <SelectItem value="urgent">Urgent</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -378,27 +304,27 @@ const LoanOrigination: React.FC<LoanOriginationProps> = ({ userRole }) => {
             <TableBody>
               {filteredApplications.map((app) => (
                 <TableRow key={app.id} className="hover:bg-gray-50">
-                  <TableCell className="font-medium">{app.id}</TableCell>
+                  <TableCell className="font-medium">{app.application_number}</TableCell>
                   <TableCell>
                     <div className="space-y-1">
-                      <div className="font-medium">{app.applicantName}</div>
+                      <div className="font-medium">{app.customer?.name}</div>
                       <div className="text-sm text-gray-500 flex items-center">
                         <Phone className="w-3 h-3 mr-1" />
-                        {app.phone}
+                        {app.customer?.phone}
                       </div>
                       <div className="text-sm text-gray-500 flex items-center">
                         <MapPin className="w-3 h-3 mr-1" />
-                        {app.location}
+                        {app.customer?.address?.city}, {app.customer?.address?.state}
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div>
-                      <div className="font-medium">{app.businessName}</div>
+                      <div className="font-medium">{app.customer?.business_name}</div>
                       <div className="text-sm text-blue-600 font-semibold">
                         ₹{app.amount.toLocaleString()} • {app.tenure}m
                       </div>
-                      <div className="text-sm text-gray-500">{app.purpose}</div>
+                      <div className="text-sm text-gray-500">{app.purpose.replace('_', ' ')}</div>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -417,30 +343,27 @@ const LoanOrigination: React.FC<LoanOriginationProps> = ({ userRole }) => {
                   <TableCell>
                     <div className="space-y-1">
                       <div className="text-center">
-                        <div className="font-semibold">CIBIL: {app.cibilScore}</div>
-                        <Badge className={getRiskBadge(app.riskScore)} variant="outline">
-                          Risk: {app.riskScore}/10
-                        </Badge>
+                        <div className="font-semibold">CIBIL: {app.customer?.cibil_score || 'N/A'}</div>
+                        {app.risk_score && (
+                          <Badge className={getRiskBadge(app.risk_score)} variant="outline">
+                            Risk: {app.risk_score}/10
+                          </Badge>
+                        )}
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
                       <div className="text-sm">
-                        KYC: <Badge variant={app.kycStatus === 'verified' ? 'default' : 'secondary'}>
-                          {app.kycStatus}
+                        KYC: <Badge variant={app.kyc_status === 'verified' ? 'default' : 'secondary'}>
+                          {app.kyc_status}
                         </Badge>
                       </div>
                       <div className="text-sm">
-                        VKYC: <Badge variant={app.vkycStatus === 'verified' ? 'default' : 'secondary'}>
-                          {app.vkycStatus}
+                        VKYC: <Badge variant={app.vkyc_status === 'verified' ? 'default' : 'secondary'}>
+                          {app.vkyc_status}
                         </Badge>
                       </div>
-                      {app.missingDocs.length > 0 && (
-                        <div className="text-xs text-red-600">
-                          Missing: {app.missingDocs.length} docs
-                        </div>
-                      )}
                     </div>
                   </TableCell>
                   <TableCell>
@@ -455,12 +378,13 @@ const LoanOrigination: React.FC<LoanOriginationProps> = ({ userRole }) => {
                           View Details
                         </Link>
                       </Button>
-                      {app.status === 'in_review' && (
+                      {app.status === 'submitted' && (
                         <div className="flex space-x-1">
                           <Button 
                             size="sm" 
                             className="bg-green-600 hover:bg-green-700"
                             onClick={() => handleAction(app.id, 'approve')}
+                            disabled={updateApplication.isPending}
                           >
                             <CheckCircle className="w-4 h-4 mr-1" />
                             Approve
@@ -469,6 +393,7 @@ const LoanOrigination: React.FC<LoanOriginationProps> = ({ userRole }) => {
                             size="sm" 
                             variant="destructive"
                             onClick={() => handleAction(app.id, 'reject')}
+                            disabled={updateApplication.isPending}
                           >
                             <XCircle className="w-4 h-4 mr-1" />
                             Reject
@@ -481,12 +406,17 @@ const LoanOrigination: React.FC<LoanOriginationProps> = ({ userRole }) => {
               ))}
             </TableBody>
           </Table>
+          {filteredApplications.length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-gray-500">No applications found matching your criteria.</p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
       {/* Action Dialog */}
       {selectedApplication && actionType && (
-        <Card className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
             <h3 className="text-lg font-semibold mb-4">
               {actionType === 'approve' ? 'Approve Application' : 
@@ -500,7 +430,12 @@ const LoanOrigination: React.FC<LoanOriginationProps> = ({ userRole }) => {
                 rows={4}
               />
               <div className="flex space-x-2">
-                <Button onClick={submitAction} className="flex-1">
+                <Button 
+                  onClick={submitAction} 
+                  className="flex-1"
+                  disabled={updateApplication.isPending}
+                >
+                  {updateApplication.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                   Submit
                 </Button>
                 <Button 
@@ -511,13 +446,14 @@ const LoanOrigination: React.FC<LoanOriginationProps> = ({ userRole }) => {
                     setRemarks('');
                   }}
                   className="flex-1"
+                  disabled={updateApplication.isPending}
                 >
                   Cancel
                 </Button>
               </div>
             </div>
           </div>
-        </Card>
+        </div>
       )}
     </div>
   );
