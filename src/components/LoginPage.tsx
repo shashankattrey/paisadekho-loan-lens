@@ -54,8 +54,9 @@ const LoginPage = () => {
       } else {
         setError(result.message || 'Login failed');
       }
-    } catch (err) {
-      setError('An unexpected error occurred');
+    } catch (err: any) {
+      console.error('Login error:', err);
+      setError(err.message || 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }
@@ -68,6 +69,7 @@ const LoginPage = () => {
     setSuccess('');
 
     try {
+      console.log('Starting signup process...');
       await signUp(signupEmail, signupPassword, fullName, role);
       setSuccess('Account created successfully! You can now login.');
       // Reset form
@@ -76,7 +78,22 @@ const LoginPage = () => {
       setFullName('');
       setRole('credit_officer');
     } catch (err: any) {
-      setError(err.message || 'Signup failed');
+      console.error('Signup error:', err);
+      let errorMessage = 'Signup failed';
+      
+      if (err.message) {
+        if (err.message.includes('User already registered')) {
+          errorMessage = 'An account with this email already exists. Please try logging in instead.';
+        } else if (err.message.includes('Password')) {
+          errorMessage = 'Password must be at least 6 characters long.';
+        } else if (err.message.includes('Email')) {
+          errorMessage = 'Please enter a valid email address.';
+        } else {
+          errorMessage = err.message;
+        }
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -116,11 +133,21 @@ const LoginPage = () => {
     setSuccess('');
     
     try {
+      console.log('Creating admin user...');
       await signUp('admin@paisadekho.com', 'admin123', 'Admin User', 'admin');
-      setSuccess('Admin user created! You can now login with admin@paisadekho.com / admin123');
+      setSuccess('Admin user created successfully! You can now login with admin@paisadekho.com / admin123');
       fillDemoCredentials('admin@paisadekho.com', 'admin123');
     } catch (err: any) {
-      setError(err.message || 'Failed to create admin user');
+      console.error('Admin creation error:', err);
+      let errorMessage = 'Failed to create admin user';
+      
+      if (err.message && err.message.includes('User already registered')) {
+        errorMessage = 'Admin user already exists! You can login with admin@paisadekho.com / admin123';
+        setSuccess(errorMessage);
+        fillDemoCredentials('admin@paisadekho.com', 'admin123');
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }

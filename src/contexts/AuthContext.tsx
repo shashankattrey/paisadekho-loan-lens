@@ -102,7 +102,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signUp = async (email: string, password: string, fullName: string, role: string = 'credit_officer') => {
-    const { error } = await supabase.auth.signUp({
+    console.log('Attempting to sign up user:', { email, fullName, role });
+    
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -114,8 +116,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     if (error) {
+      console.error('Signup error:', error);
       throw error;
     }
+
+    console.log('Signup successful:', data);
+    
+    // The profile should be created automatically by the database trigger
+    // Wait a moment for the trigger to complete
+    if (data.user) {
+      setTimeout(async () => {
+        try {
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', data.user.id)
+            .single();
+          
+          if (profileError) {
+            console.error('Profile creation error:', profileError);
+          } else {
+            console.log('Profile created successfully:', profile);
+          }
+        } catch (err) {
+          console.error('Error checking profile:', err);
+        }
+      }, 1000);
+    }
+
+    return data;
   };
 
   const signOut = async () => {
