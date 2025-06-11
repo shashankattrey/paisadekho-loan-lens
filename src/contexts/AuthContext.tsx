@@ -9,7 +9,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, fullName: string, role?: string) => Promise<void>;
+  signUp: (email: string, password: string, fullName: string, role?: string) => Promise<any>;
   signOut: () => Promise<void>;
   login: (email: string, password: string, otpCode?: string) => Promise<{ success: boolean; requires2FA?: boolean; message?: string }>;
   logout: () => Promise<void>;
