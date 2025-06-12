@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
@@ -104,47 +103,97 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUp = async (email: string, password: string, fullName: string, role: string = 'credit_officer') => {
     console.log('Attempting to sign up user:', { email, fullName, role });
     
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-          role: role,
+    try {
+      // First, let's try a simple signup without metadata to see if the basic auth works
+      console.log('Trying signup with minimal data first...');
+      
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+            role: role,
+          }
+        }
+      });
+
+      if (error) {
+        console.error('Signup error details:', {
+          message: error.message,
+          status: error.status,
+          code: error.code,
+          details: error
+        });
+        throw error;
+      }
+
+      console.log('Signup successful, checking response:', data);
+      
+      // Wait a moment for the trigger to complete
+      if (data.user) {
+        setTimeout(async () => {
+          try {
+            const { data: profile, error: profileError } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', data.user.id)
+              .single();
+            
+            if (profileError) {
+              console.error('Profile creation error:', profileError);
+            } else {
+              console.log('Profile created successfully:', profile);
+            }
+          } catch (err) {
+            console.error('Error checking profile:', err);
+          }
+        }, 2000); // Wait longer for trigger to complete
+      }
+
+      return data;
+    } catch (error: any) {
+      console.error('Full signup error:', error);
+      
+      // Check if it's a specific trigger or database issue
+      if (error.message?.includes('Database error saving new user')) {
+        console.error('This appears to be a database trigger issue');
+        
+        // Try manual profile creation as fallback
+        try {
+          console.log('Attempting manual profile creation fallback...');
+          const simpleSignup = await supabase.auth.signUp({
+            email,
+            password
+          });
+          
+          if (simpleSignup.data.user && !simpleSignup.error) {
+            console.log('Basic signup worked, creating profile manually...');
+            
+            const { error: profileError } = await supabase
+              .from('profiles')
+              .insert({
+                id: simpleSignup.data.user.id,
+                email: email,
+                full_name: fullName,
+                role: role as any
+              });
+              
+            if (profileError) {
+              console.error('Manual profile creation failed:', profileError);
+            } else {
+              console.log('Manual profile creation successful');
+            }
+            
+            return simpleSignup.data;
+          }
+        } catch (fallbackError) {
+          console.error('Fallback attempt also failed:', fallbackError);
         }
       }
-    });
-
-    if (error) {
-      console.error('Signup error:', error);
+      
       throw error;
     }
-
-    console.log('Signup successful:', data);
-    
-    // The profile should be created automatically by the database trigger
-    // Wait a moment for the trigger to complete
-    if (data.user) {
-      setTimeout(async () => {
-        try {
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', data.user.id)
-            .single();
-          
-          if (profileError) {
-            console.error('Profile creation error:', profileError);
-          } else {
-            console.log('Profile created successfully:', profile);
-          }
-        } catch (err) {
-          console.error('Error checking profile:', err);
-        }
-      }, 1000);
-    }
-
-    return data;
   };
 
   const signOut = async () => {
