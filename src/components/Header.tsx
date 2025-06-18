@@ -25,13 +25,7 @@ const Header = () => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
   };
 
-  const getUserName = () => {
-    return user?.profile?.full_name || user?.email || 'User';
-  };
-
-  const getUserRole = () => {
-    return user?.profile?.role || 'credit_officer';
-  };
+  if (!user) return null;
 
   return (
     <header className="bg-white border-b border-gray-200 px-6 py-4">
@@ -61,13 +55,13 @@ const Header = () => {
               <Button variant="ghost" className="flex items-center space-x-3 px-3 py-2">
                 <Avatar className="w-8 h-8">
                   <AvatarFallback className="bg-blue-100 text-blue-600">
-                    {user ? getInitials(getUserName()) : 'U'}
+                    {getInitials(user.full_name)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="text-left">
-                  <div className="font-medium text-sm">{getUserName()}</div>
-                  <Badge className={`text-xs ${user ? getRoleBadge(getUserRole()) : ''}`}>
-                    {getUserRole().replace('_', ' ').toUpperCase()}
+                  <div className="font-medium text-sm">{user.full_name}</div>
+                  <Badge className={`text-xs ${getRoleBadge(user.role)}`}>
+                    {user.role.replace('_', ' ').toUpperCase()}
                   </Badge>
                 </div>
               </Button>
@@ -75,11 +69,8 @@ const Header = () => {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>
                 <div>
-                  <div className="font-medium">{getUserName()}</div>
-                  <div className="text-sm text-gray-500">{user?.email}</div>
-                  <div className="text-xs text-gray-400 mt-1">
-                    Last login: {user?.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : 'Never'}
-                  </div>
+                  <div className="font-medium">{user.full_name}</div>
+                  <div className="text-sm text-gray-500">{user.email}</div>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />

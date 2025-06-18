@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -51,21 +52,23 @@ const UserRoles = [
 
 const Index = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, availableUsers, signInAsUser } = useAuth();
+
+  const handleRoleSelect = async (roleType: string) => {
+    // Find a user with the matching role
+    const matchingUser = availableUsers.find(user => user.role === roleType);
+    if (matchingUser) {
+      await signInAsUser(matchingUser.id);
+      navigate('/dashboard');
+    }
+  };
 
   const handleGetStarted = () => {
     if (isAuthenticated) {
       navigate('/dashboard');
     } else {
-      navigate('/login');
-    }
-  };
-
-  const handleRoleSelect = (role: any) => {
-    if (isAuthenticated) {
-      navigate('/dashboard');
-    } else {
-      navigate('/login');
+      // Just show the role selection below
+      document.getElementById('role-selection')?.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
@@ -90,30 +93,27 @@ const Index = () => {
           <div className="flex justify-center space-x-4">
             <Button onClick={handleGetStarted} className="bg-blue-600 hover:bg-blue-700" size="lg">
               <LogIn className="w-4 h-4 mr-2" />
-              {isAuthenticated ? 'Go to Dashboard' : 'Sign In to Continue'}
+              {isAuthenticated ? 'Go to Dashboard' : 'Select Your Role'}
             </Button>
-            {!isAuthenticated && (
-              <Button variant="outline" onClick={() => navigate('/login')} size="lg">
-                View Demo Credentials
-              </Button>
-            )}
           </div>
         </div>
 
         {/* Role Selection */}
-        <div className="max-w-4xl mx-auto">
+        <div id="role-selection" className="max-w-4xl mx-auto">
           <h2 className="text-2xl font-semibold text-center mb-8 text-gray-800">
-            Role-Based Access Control
+            {isAuthenticated ? 'Switch Role' : 'Select Your Role'}
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {UserRoles.map((role) => {
               const IconComponent = role.icon;
+              const hasUser = availableUsers.some(user => user.role === role.id);
+              
               return (
                 <Card 
                   key={role.id} 
-                  className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-2 hover:border-blue-300"
-                  onClick={() => handleRoleSelect(role)}
+                  className={`cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-2 hover:border-blue-300 ${!hasUser ? 'opacity-50' : ''}`}
+                  onClick={() => hasUser && handleRoleSelect(role.id)}
                 >
                   <CardHeader className="text-center pb-4">
                     <div className={`${role.color} w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-white`}>
@@ -132,8 +132,11 @@ const Index = () => {
                         </Badge>
                       ))}
                     </div>
-                    <Button className="w-full mt-4 bg-blue-600 hover:bg-blue-700">
-                      {isAuthenticated ? 'Access Dashboard' : 'Sign In Required'}
+                    <Button 
+                      className={`w-full mt-4 ${hasUser ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'}`}
+                      disabled={!hasUser}
+                    >
+                      {hasUser ? 'Sign In as ' + role.title : 'User Not Available'}
                     </Button>
                   </CardContent>
                 </Card>

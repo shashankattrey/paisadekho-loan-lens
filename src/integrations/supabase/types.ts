@@ -536,7 +536,7 @@ export type Database = {
           email: string
           employee_id?: string | null
           full_name: string
-          id: string
+          id?: string
           is_active?: boolean | null
           phone?: string | null
           role?: Database["public"]["Enums"]["user_role"]
